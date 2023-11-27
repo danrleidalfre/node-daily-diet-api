@@ -27,21 +27,21 @@ describe('routes', () => {
   })
 
   it('should allow listing of users', async () => {
-    const createTransactionResponse = await request(app.server)
+    const createUserResponse = await request(app.server)
       .post('/users')
       .send({
         name: 'Test User',
       })
       .expect(201)
 
-    const cookies = createTransactionResponse.get('Set-Cookie')
+    const cookies = createUserResponse.get('Set-Cookie')
 
-    const listTransactionResponse = await request(app.server)
+    const listUserResponse = await request(app.server)
       .get('/users')
       .set('Cookie', cookies)
       .expect(200)
 
-    expect(listTransactionResponse.body.users).toEqual([
+    expect(listUserResponse.body.users).toEqual([
       expect.objectContaining({
         name: 'Test User',
       }),
