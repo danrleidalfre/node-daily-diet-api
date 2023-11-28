@@ -1,6 +1,3 @@
-// eslint-disable-next-line
-import { Knex } from "knex";
-
 declare module 'knex/types/tables' {
   export interface Tables {
     users: {
@@ -13,7 +10,7 @@ declare module 'knex/types/tables' {
       user_id: string
       title: string
       date: string
-      diet: binary
+      diet: boolean
     }
   }
 }
