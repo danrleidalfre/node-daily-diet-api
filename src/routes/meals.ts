@@ -144,4 +144,72 @@ export async function mealsRoutes(app: FastifyInstance) {
       return reply.status(204).send()
     },
   )
+
+  app.get(
+    '/total',
+    {
+      preHandler: [checkSessionId],
+    },
+    async (request) => {
+      const { sessionId } = request.cookies
+
+      const user = await knex('users').where('session_id', sessionId).first()
+
+      const userBodySchema = z.object({
+        id: z.string().uuid(),
+      })
+
+      const { id } = userBodySchema.parse(user)
+
+      return knex('meals').where('user_id', id).count('id as total').first()
+    },
+  )
+
+  app.get(
+    '/in-diet',
+    {
+      preHandler: [checkSessionId],
+    },
+    async (request) => {
+      const { sessionId } = request.cookies
+
+      const user = await knex('users').where('session_id', sessionId).first()
+
+      const userBodySchema = z.object({
+        id: z.string().uuid(),
+      })
+
+      const { id } = userBodySchema.parse(user)
+
+      return knex('meals')
+        .where('user_id', id)
+        .where('diet', true)
+        .count('id as in_diet')
+        .first()
+    },
+  )
+
+  app.get(
+    '/out-diet',
+    {
+      preHandler: [checkSessionId],
+    },
+    async (request) => {
+      const { sessionId } = request.cookies
+
+      const user = await knex('users').where('session_id', sessionId).first()
+
+      const userBodySchema = z.object({
+        id: z.string().uuid(),
+      })
+
+      const { id } = userBodySchema.parse(user)
+
+      return knex('meals')
+        .where('user_id', id)
+        .where('diet', false)
+        .count('id as out_diet')
+        .first()
+    },
+  )
 }
