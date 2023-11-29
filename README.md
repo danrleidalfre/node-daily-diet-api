@@ -11,7 +11,7 @@
   - Data e Hora (datetime) yyyy-mm-dd hh:mm:ss
   - Está dentro ou não da dieta (boolean)
 
-- [ ] Deve ser possível editar uma refeição, podendo alterar todos os dados acima
+- [x] Deve ser possível editar uma refeição, podendo alterar todos os dados acima
 
 - [ ] Deve ser possível apagar uma refeição
 
