@@ -4,22 +4,22 @@
 
 - [x] Deve ser possível identificar o usuário entre as requisições
 
-- [ ] Deve ser possível registrar uma refeição feita, com as seguintes informações:
+- [x] Deve ser possível registrar uma refeição feita, com as seguintes informações:
 
-- Nome
-- Descrição
-- Data e Hora
-- Está dentro ou não da dieta
+  - Nome (string)
+  - Descrição (text)
+  - Data e Hora (datetime) yyyy-mm-dd hh:mm:ss
+  - Está dentro ou não da dieta (boolean)
 
 - [ ] Deve ser possível editar uma refeição, podendo alterar todos os dados acima
 
 - [ ] Deve ser possível apagar uma refeição
 
-- [ ] Deve ser possível listar todas as refeições de um usuário
+- [x] Deve ser possível listar todas as refeições de um usuário
 
 - [ ] Deve ser possível visualizar uma única refeição
 
-- Deve ser possível recuperar as métricas de um usuário
+- [ ] Deve ser possível recuperar as métricas de um usuário:
   - [ ] Quantidade total de refeições registradas
 
   - [ ] Quantidade total de refeições dentro da dieta
