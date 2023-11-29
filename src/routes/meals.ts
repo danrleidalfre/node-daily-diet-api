@@ -27,6 +27,29 @@ export async function mealsRoutes(app: FastifyInstance) {
     },
   )
 
+  app.get('/:id', { preHandler: [checkSessionId] }, async (request, reply) => {
+    const { id: mealId } = z
+      .object({ id: z.string().uuid() })
+      .parse(request.params)
+
+    const sessionId = request.cookies.sessionId
+    const user = await knex('users').where('session_id', sessionId).first()
+
+    const userBodySchema = z.object({
+      id: z.string().uuid(),
+    })
+
+    const { id } = userBodySchema.parse(user)
+
+    const meal = await knex('meals').where('id', mealId).first()
+
+    if (!meal || meal.user_id !== id) {
+      return reply.status(404).send({ error: 'Meal not found or unauthorized' })
+    }
+
+    return reply.status(200).send({ meal })
+  })
+
   app.post(
     '/',
     {
@@ -49,7 +72,7 @@ export async function mealsRoutes(app: FastifyInstance) {
         id: z.string().uuid(),
       })
 
-      const { id } = userBodySchema.parse(user)
+      const { id: userId } = userBodySchema.parse(user)
 
       if (isNaN(new Date(date).getTime())) {
         return reply.status(422).send({
@@ -59,7 +82,7 @@ export async function mealsRoutes(app: FastifyInstance) {
 
       await knex('meals').insert({
         id: randomUUID(),
-        user_id: id,
+        user_id: userId,
         title,
         description,
         date,
@@ -70,39 +93,55 @@ export async function mealsRoutes(app: FastifyInstance) {
     },
   )
 
-  app.put(
-    '/:id',
-    {
-      preHandler: [checkSessionId],
-    },
-    async (request, reply) => {
-      const getMealParamsSchema = z.object({
-        id: z.string().uuid(),
-      })
+  app.put('/:id', { preHandler: [checkSessionId] }, async (request, reply) => {
+    const { id: mealId } = z
+      .object({ id: z.string().uuid() })
+      .parse(request.params)
 
-      const { id: mealId } = getMealParamsSchema.parse(request.params)
-
-      const updateMealParamsSchema = z.object({
+    const { title, description, date, diet } = z
+      .object({
         title: z.string(),
         description: z.string(),
         date: z.string(),
         diet: z.boolean(),
       })
+      .parse(request.body)
 
-      const { title, description, date, diet } = updateMealParamsSchema.parse(
-        request.body,
-      )
+    await knex('meals')
+      .update({ title, description, date, diet })
+      .where('id', mealId)
 
-      await knex('meals')
-        .update({
-          title,
-          description,
-          date,
-          diet,
-        })
-        .where('id', mealId)
+    return reply.status(201).send()
+  })
 
-      return reply.status(201).send()
+  app.delete(
+    '/:id',
+    { preHandler: [checkSessionId] },
+    async (request, reply) => {
+      const { id: mealId } = z
+        .object({ id: z.string().uuid() })
+        .parse(request.params)
+
+      const sessionId = request.cookies.sessionId
+      const user = await knex('users').where('session_id', sessionId).first()
+
+      const userBodySchema = z.object({
+        id: z.string().uuid(),
+      })
+
+      const { id } = userBodySchema.parse(user)
+
+      const meal = await knex('meals').where('id', mealId).first()
+
+      if (!meal || meal.user_id !== id) {
+        return reply
+          .status(404)
+          .send({ error: 'Meal not found or unauthorized' })
+      }
+
+      await knex('meals').where('id', mealId).del()
+
+      return reply.status(204).send()
     },
   )
 }
