@@ -212,4 +212,42 @@ export async function mealsRoutes(app: FastifyInstance) {
         .first()
     },
   )
+
+  app.get(
+    '/best-sequence',
+    {
+      preHandler: [checkSessionId],
+    },
+    async (request) => {
+      const { sessionId } = request.cookies
+
+      const user = await knex('users').where('session_id', sessionId).first()
+
+      const userBodySchema = z.object({
+        id: z.string().uuid(),
+      })
+
+      const { id } = userBodySchema.parse(user)
+
+      const result = await knex.raw(
+        `
+        SELECT MAX(group_size) as best_sequence
+        FROM (
+          SELECT diet, COUNT(*) as group_size
+          FROM (
+            SELECT diet, date,
+             ROW_NUMBER() OVER (ORDER BY date) -
+             ROW_NUMBER() OVER (PARTITION BY diet ORDER BY date) as grp
+            FROM meals
+          ) as subquery
+          GROUP BY diet, grp
+        ) as subquery2
+        WHERE diet = true
+      `,
+        { id },
+      )
+
+      return result[0]
+    },
+  )
 }
